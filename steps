@@ -1,0 +1,36 @@
+#卸载预装的 PyTorch
+pip uninstall torch
+
+#安装 F5-TTS 相关环境
+conda create -n f5-tts python=3.10
+conda activate f5-tts
+
+apt update
+apt install -y ffmpeg
+
+pip uninstall torch torchvision torchaudio transformers
+
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install transformers
+
+git clone https://github.com/SWivid/F5-TTS.git
+cd F5-TTS
+pip install -e .
+
+#解决网络克隆失败问题
+git config --global http.sslVerify false
+git config --global http.sslVerify true
+
+#解决无法连接 HuggingFace问题
+export HF_ENDPOINT=https://hf-mirror.com
+
+#解决公共链接问题：
+wget https://cdn-media.hf-mirror.com/frpc-gradio-0.3/frpc_linux_amd64 -O frpc_linux_amd64_v0.3
+#mkdir -p /workspace/stable-diffusion-webui/venv/lib/python3.10/site-packages/gradio
+mv frpc_linux_amd64_v0.3 /root/miniconda3/envs/f5-tts/lib/python3.10/site-packages/gradio/
+chmod +x /root/miniconda3/envs/f5-tts/lib/python3.10/site-packages/gradio/frpc_linux_amd64_v0.3
+
+#启动服务
+f5-tts_infer-gradio --port 7860 --host 0.0.0.0 --share
+
+
